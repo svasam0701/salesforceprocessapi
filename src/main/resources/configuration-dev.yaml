@@ -1,0 +1,32 @@
+http:
+  host: "0.0.0.0"
+  port: "8091"
+  timeout: "30000"
+  path: "/api/salesforceprocessapi/*"
+
+api:
+  autodiscoveryId: "17622561"
+
+#Calling Salesforce System API
+salesforceobjectsapi:
+  host: 'salesforceobjectsapi.us-e2.cloudhub.io'
+  port: '443'
+  basepath: "/api/salesforceobjectsapi/"
+  client_id: "87b25edf7eaa40d4acbe06b98af1364a"
+  client_secret: ""
+  timeout: '30000'
+  
+### JSON Logger configuration ###
+
+# Indicate which fields should not be logged
+json:
+  logger:
+    disabledFields: ""
+    application:
+      name: "salesforceprocessapi"
+      version: "1.0.0-SNAPSHOT"
+      
+### Error Handler configuration ###
+application:
+ name: "salesforceprocessapi"
+ version: "1.0.0-SNAPSHOT"

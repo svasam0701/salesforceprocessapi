@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<flow name="getItems" doc:id="ae81e1af-73ae-4e42-85e6-9c4e44d07e78" >
+		<logger level="INFO" doc:name="getItemsFlowInvoked" doc:id="b6d107f2-7658-4903-ab11-11ab584df8b7" message="getItemsFlowInvoked" />
+		<http:request method="GET" doc:name="getItems" doc:id="26dada3f-f1ad-46e0-b627-2b86f751ac1c" config-ref="HTTP_Request_configuration" path="/item" responseTimeout="${salesforceobjectsapi.timeout}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : "${secure::salesforceobjectsapi.client_secret}",
+	"Content-Type" : "application/json",
+	"client_id" : "${salesforceobjectsapi.client_id}"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="d078cf95-fdf3-49c9-aa17-b8471bd0c3d0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload]" doc:name="finalResponse" doc:id="d4b88782-49dd-4557-952f-90efa5c0ffb0" />
+	</flow>
+	<flow name="createItems" doc:id="5529fea7-640e-4616-8d9f-62fc58d32218" >
+		<logger level="INFO" doc:name="createItemsFlowInvoked" doc:id="8845adb0-fb61-4b29-bbd4-515dc2906a63" message="createItemsFlowInvoked" />
+		<http:request method="POST" doc:name="createItems" doc:id="fdd6d7df-cde4-4f37-96cf-efcd67e96217" config-ref="HTTP_Request_configuration" path="/item" responseTimeout="${salesforceobjectsapi.timeout}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : "${secure::salesforceobjectsapi.client_secret}",
+	"Content-Type" : "application/json",
+	"client_id" : "${salesforceobjectsapi.client_id}"
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="itemCreate" doc:id="f4aee69f-7f52-4dac-b400-8e6b67fec8be" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="721facd2-da08-40bd-8edb-57518a0bc30f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload]" doc:name="finalResponse" doc:id="c16ab97b-a8d7-4b64-92f0-39ed2b406a08" />
+	</flow>
+</mule>

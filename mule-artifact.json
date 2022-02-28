@@ -1,0 +1,16 @@
+{
+	"classLoaderModelLoaderDescriptor": {
+		"id": "mule",
+		"attributes": {
+			"exportedResources": []
+		}
+	},
+	"minMuleVersion": "4.4.0",
+	"secureProperties": [
+		"encryptionKey",
+		"anypoint.platform.client_secret",
+		"secure::salesforceobjectsapi.client_secret",
+		"configuration-local-secure.yaml",
+		"configuration-dev-secure.yaml"
+	]
+}

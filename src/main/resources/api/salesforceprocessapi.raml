@@ -1,0 +1,103 @@
+#%RAML 1.0
+baseUri: https://salesforceprocessapi.cloudhub.io
+version: 1.0.0
+description: This is the Business Process API which Invokes System API to perform CRUD Operations
+title: SalesforceProcessAPI
+
+types:
+  Order: !include types/orderDataType.raml
+  Item: !include types/itemDataType.raml
+  Customer: !include types/customerDataType.raml
+
+traits:
+  client-id-required:
+    description: Client Credentials is required to invoke any of the below methods.
+    headers:
+      client_id:
+        type: string
+      client_secret:
+        type: string
+
+mediaType: application/json
+protocols: [HTTPS]
+
+/order:
+  get:
+    description: get order Information
+    is: [client-id-required]
+    responses:
+      200:
+        body:
+          application/json:
+            type: Order
+            examples:
+              output: !include examples/orderExample.json
+
+  post:
+    description: create order
+    is: [client-id-required]
+    body:
+      application/json:
+        type: Order
+        examples:
+          input: !include examples/orderExample.json
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Order created (but not really)
+
+/item:
+  get:
+    description: get Item Information
+    is: [client-id-required]
+    responses:
+      200:
+        body:
+          application/json:
+            type: Item
+            examples:
+              output: !include examples/itemExample.json
+
+  post:
+    description: create item in object
+    is: [client-id-required]
+    body:
+      application/json:
+        type: Item
+        examples:
+          input: !include examples/itemExample.json
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Item created (but not really)
+
+/customer:
+  get:
+    description: get customer Information
+    is: [client-id-required]
+    responses:
+      200:
+        body:
+          application/json:
+            type: Customer
+            examples:
+              output: !include examples/customerExample.json
+
+  post:
+    description: create customer in salesforce customer object
+    is: [client-id-required]
+    body:
+      application/json:
+        type: Customer
+        examples:
+          input: !include examples/customerExample.json
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Customer created (but not really)

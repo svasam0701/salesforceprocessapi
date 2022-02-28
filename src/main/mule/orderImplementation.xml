@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:error-handler-plugin="http://www.mulesoft.org/schema/mule/error-handler-plugin" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org/schema/mule/error-handler-plugin/current/mule-error-handler-plugin.xsd">
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="6061704f-a96a-46f5-ba29-da52acf8a72a" environment="${mule.env}" />
+	<flow name="getOrders" doc:id="26d69227-8e53-4d31-a5aa-fe6118355549" >
+		<json-logger:logger doc:name="getOrdersFlowInvoked" doc:id="401a7a55-47cf-4235-9f5f-31a8d505b48d" config-ref="JSON_Logger_Config" message="getOrdersFlowInvoked">
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    payload: JSONLoggerModule::stringifyNonJSON(payload)
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<http:request method="GET" doc:name="getOrders" doc:id="ca491e8c-0d80-45a6-97f8-fb5088667a5f" config-ref="HTTP_Request_configuration" path="/order" responseTimeout="${salesforceobjectsapi.timeout}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : "${secure::salesforceobjectsapi.client_secret}",
+	"Content-Type" : "application/json",
+	"client_id" : "${salesforceobjectsapi.client_id}"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="850f3730-fd7b-42d6-83b0-b25ecbae6a5a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload]" doc:name="finalResponse" doc:id="1db4cff2-fdc9-45f8-8ca0-55af1e034575" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5c623279-6c40-4945-9ac4-4d7b59789702" >
+				<error-handler-plugin:on-error doc:name="Process Error" doc:id="7f8754e1-591b-4fa7-811d-b476a0a3b0c8" config-ref="Error_Handler_Plugin_Config"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="createOrders" doc:id="33bcb6ed-b97c-4bb7-9b72-3c7444e6a740" >
+		<json-logger:logger doc:name="createOrderFlowInvoked" doc:id="38af0c8a-e508-4a99-891f-eba117d5d246" config-ref="JSON_Logger_Config" message="createOrderFlowInvoked"/>
+		<http:request method="POST" doc:name="createOrders" doc:id="5e684471-01da-4183-ab25-1639b23354d3" config-ref="HTTP_Request_configuration" path="/order" responseTimeout="${salesforceobjectsapi.timeout}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : "${secure::salesforceobjectsapi.client_secret}",
+	"Content-Type" : "application/json",
+	"client_id" : "${salesforceobjectsapi.client_id}"
+}]]]></http:headers>
+		</http:request>
+		<json-logger:logger doc:name="orderCreated" doc:id="debcbcf3-de7a-40cc-9364-36f94b64bcf3" config-ref="JSON_Logger_Config" message="orderCreated"/>
+		<ee:transform doc:name="Transform Message" doc:id="018dee94-2552-4292-8c1e-513f7ac67194" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;  response: payload,	&#10;  message: "Order created (but not really)"&#10;}]' doc:name="finalResponse" doc:id="d67336fd-6b3e-4dcd-a831-1d4a3abda4e9" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9fe9b83d-80ab-4ebf-87e9-ab49bfdba308" >
+				<error-handler-plugin:on-error doc:name="Process Error" doc:id="cd40e63d-9c67-4757-a7b1-3022e377d9e4" config-ref="Error_Handler_Plugin_Config"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

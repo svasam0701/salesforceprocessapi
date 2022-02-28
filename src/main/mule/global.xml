@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:error-handler-plugin="http://www.mulesoft.org/schema/mule/error-handler-plugin"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org/schema/mule/error-handler-plugin/current/mule-error-handler-plugin.xsd">
+	<http:listener-config name="salesforceprocessapi-httpListenerConfig">
+        <http:listener-connection host="${http.host}" port="${http.port}" readTimeout="${http.timeout}"/>
+    </http:listener-config>
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="580c70d9-bd1f-4e79-b286-662adeaea2b5" basePath="${salesforceobjectsapi.basepath}">
+		<http:request-connection host="${salesforceobjectsapi.host}" connectionIdleTimeout="${salesforceobjectsapi.timeout}" />
+	</http:request-config>
+    <apikit:config name="salesforceprocessapi-config" api="salesforceprocessapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<api-gateway:autodiscovery apiId="${api.autodiscoveryId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="bcee717f-ef7b-490d-88b1-e38c0fd0954f" flowRef="salesforceprocessapi-main" />
+	<configuration-properties doc:name="Configuration properties" doc:id="23e23f9b-74da-4751-8c9f-3424d29b8f04" file="configuration-${mule.env}.yaml" />
+	<global-property doc:name="Global Property" doc:id="35f27749-c0e7-4dfc-bb31-f8f751ca6b8d" name="mule.env" value="local" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="edcf699d-98f8-4fb3-b724-09284c9614fd" file="configuration-${mule.env}-secure.yaml" key="${encryptionKey}" />
+	<global-property doc:name="Global Property" doc:id="e7b3d8e0-21c2-44c7-96b8-b2b66b487acd" name="encryptionKey" value="0123456789123456" />
+	<error-handler-plugin:config name="Error_Handler_Plugin_Config" doc:name="Error Handler Plugin Config" doc:id="e93f34c4-6823-4451-a4bf-7fd69c100d6c" apiName="#[Mule::p('application.name')]" apiVersion="#[Mule::p('application.version')]"/>
+</mule>

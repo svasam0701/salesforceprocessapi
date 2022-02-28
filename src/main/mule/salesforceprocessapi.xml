@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:error-handler-plugin="http://www.mulesoft.org/schema/mule/error-handler-plugin" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org/schema/mule/error-handler-plugin/current/mule-error-handler-plugin.xsd">
+    <flow name="salesforceprocessapi-main">
+        <http:listener config-ref="salesforceprocessapi-httpListenerConfig" path="${http.path}">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="salesforceprocessapi-config" />
+        <error-handler>
+            <on-error-propagate type="ANY" enableNotifications="true" logException="true">
+                <error-handler-plugin:on-error doc:name="Process Error" doc:id="65564d8d-875e-41a4-bed1-5436d75a84f1" config-ref="Error_Handler_Plugin_Config"/>
+				<set-variable value="#[payload.errorDetails.code[0]]" doc:name="httpStatus" doc:id="3948ff01-79da-40df-8d45-c881607df6ab" variableName="httpStatus"/>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="salesforceprocessapi-console">
+        <http:listener config-ref="salesforceprocessapi-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="salesforceprocessapi-config" />
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="179e1b04-957b-47b0-870e-8bb239b13ce3" type="ANY" >
+				<error-handler-plugin:on-error doc:name="Process Error" doc:id="9c65a1fc-ead0-426b-9ea4-ff1c814a3a9d" config-ref="Error_Handler_Plugin_Config" target="httpStatus" />
+				<set-variable value="#[payload.errorDetails.code[0]]" doc:name="httpStatus" doc:id="232aa7f5-f5f4-427c-9eef-c02fbc7e8670" variableName="httpStatus" />
+			</on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\customer:salesforceprocessapi-config">
+		<flow-ref doc:name="getCustomers" doc:id="266cb867-76a7-474c-8c5d-dfa46657f1ab" name="getCustomers"/>
+    </flow>
+    <flow name="get:\item:salesforceprocessapi-config">
+		<flow-ref doc:name="getItems" doc:id="72c4db2c-76eb-4e06-b102-d03c87a1f892" name="getItems"/>
+    </flow>
+    <flow name="get:\order:salesforceprocessapi-config">
+		<flow-ref doc:name="getOrders" doc:id="41547873-bd82-435c-8111-7d5850e501e4" name="getOrders"/>
+    </flow>
+    <flow name="post:\customer:application\json:salesforceprocessapi-config">
+		<flow-ref doc:name="createCustomers" doc:id="80d2e9e6-fde8-40ef-b670-901c68f84770" name="createCustomers"/>
+    </flow>
+    <flow name="post:\item:application\json:salesforceprocessapi-config">
+		<flow-ref doc:name="createItems" doc:id="2bb8e725-92a5-4215-bee0-338f4510e552" name="createItems"/>
+    </flow>
+    <flow name="post:\order:application\json:salesforceprocessapi-config">
+		<flow-ref doc:name="createOrders" doc:id="a2a283c5-9d3e-4f52-a44e-eb5bb5c615d1" name="createOrders"/>
+    </flow>
+</mule>

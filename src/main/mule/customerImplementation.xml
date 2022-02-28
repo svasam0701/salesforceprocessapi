@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="getCustomers" doc:id="355627be-c825-4ee3-962b-7f16808fce93" >
+		<logger level="INFO" doc:name="getCustomersFlowInvoked" doc:id="6388e8b8-e09d-426d-a6a8-5af97ad15d8e" message="getCustomersFlowInvoked" />
+		<http:request method="GET" doc:name="getCustomers" doc:id="0cf967ff-1ae7-4880-9a92-603640ed9062" config-ref="HTTP_Request_configuration" path="/customer" responseTimeout="${salesforceobjectsapi.timeout}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : "${secure::salesforceobjectsapi.client_secret}",
+	"Content-Type" : "application/json",
+	"client_id" : "${salesforceobjectsapi.client_id}"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="3ee60406-357c-4c4e-b249-5ce5e1899756" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload]" doc:name="finalResponse" doc:id="eacc4835-dae3-4315-b216-625956f66805" />
+	</flow>
+	<flow name="createCustomers" doc:id="d26cb72d-33f2-47ae-b1d3-e5d4c2a9fc52" >
+		<logger level="INFO" doc:name="createCustomersFlowInvoked" doc:id="55933d84-2088-4e9b-ab5f-3d82cfd6c94d" message="createCustomersFlowInvoked" />
+		<http:request method="POST" doc:name="createCustomers" doc:id="d0d7d5e5-46d0-4834-adba-dfef4fb921c8" config-ref="HTTP_Request_configuration" path="/customer" responseTimeout="${salesforceobjectsapi.timeout}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : "${secure::salesforceobjectsapi.client_secret}",
+	"Content-Type" : "application/json",
+	"client_id" : "${salesforceobjectsapi.client_id}"
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="customerCreated" doc:id="0e58b584-44a4-435e-ae84-67b323250a7e" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="fdc99fac-feaa-4226-804b-0ca72ccd6da9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload]" doc:name="finalResponse" doc:id="ee733324-063a-4348-9081-da38f10fcc53" />
+	</flow>
+</mule>
